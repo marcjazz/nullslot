@@ -35,9 +35,9 @@ impl Broadcaster {
 
 pub async fn ws_handler(
     ws: WebSocketUpgrade,
-    State(broadcaster): State<Arc<Broadcaster>>,
+    State(state): State<crate::AppState>,
 ) -> impl IntoResponse {
-    ws.on_upgrade(move |socket| handle_socket(socket, broadcaster))
+    ws.on_upgrade(move |socket| handle_socket(socket, state.broadcaster))
 }
 
 async fn handle_socket(mut socket: WebSocket, broadcaster: Arc<Broadcaster>) {

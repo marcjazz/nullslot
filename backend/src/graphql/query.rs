@@ -7,13 +7,25 @@ use crate::service::{
     UserService, ResourceService, CourseService, RoomService,
     TimeSlotService, TimetableEntryService, SubstitutionService,
     SnapshotService, AvailabilityService, ConflictService,
-    DraftTimetableService, PublishedTimetableService
+    DraftTimetableService, PublishedTimetableService,
+    auth::Claims
 };
+use crate::error::AppError;
+use async_graphql::ErrorExtensions;
 
 pub struct Query;
 
 #[Object]
 impl Query {
+    async fn me(&self, ctx: &Context<'_>) -> Result<User> {
+        let claims = ctx.data::<Claims>().map_err(|_| AppError::Unauthorized.extend())?;
+        let service = ctx.data::<UserService>()?;
+        service
+            .get_user(claims.sub)
+            .await?
+            .ok_or_else(|| AppError::NotFound.extend())
+    }
+
     async fn users(&self, ctx: &Context<'_>) -> Result<Vec<User>> {
         let service = ctx.data::<UserService>()?;
         Ok(service.get_all_users().await?)

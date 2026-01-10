@@ -1,5 +1,7 @@
 use async_graphql::{EmptySubscription, Schema};
 use std::sync::Arc;
+use crate::config::Config;
+use crate::oidc::OidcClient;
 use crate::ws::Broadcaster;
 use crate::graphql::query::Query;
 use crate::graphql::mutation::Mutation;
@@ -7,19 +9,24 @@ use crate::repository::{
     UserRepository, ResourceRepository, CourseRepository, RoomRepository,
     TimeSlotRepository, TimetableEntryRepository, SubstitutionRepository,
     AvailabilityRepository, ConflictRepository, DraftTimetableRepository,
-    PublishedTimetableRepository, DraftEntryRepository
+    PublishedTimetableRepository, DraftEntryRepository, AuthRepository
 };
 use crate::service::{
     UserService, ResourceService, CourseService, RoomService,
     TimeSlotService, TimetableEntryService, SubstitutionService,
     NotificationService, SnapshotService, AvailabilityService,
     ConflictService, DraftTimetableService, PublishedTimetableService,
-    DraftEntryService
+    DraftEntryService, AuthService
 };
 
 pub type AppSchema = Schema<Query, Mutation, EmptySubscription>;
 
-pub fn create_schema(pool: sqlx::PgPool, broadcaster: Arc<Broadcaster>) -> AppSchema {
+pub fn create_schema(
+    pool: sqlx::PgPool,
+    broadcaster: Arc<Broadcaster>,
+    config: Arc<Config>,
+    oidc_client: Arc<OidcClient>,
+) -> AppSchema {
     let user_repo = UserRepository::new(pool.clone());
     let resource_repo = ResourceRepository::new(pool.clone());
     let course_repo = CourseRepository::new(pool.clone());
@@ -32,6 +39,7 @@ pub fn create_schema(pool: sqlx::PgPool, broadcaster: Arc<Broadcaster>) -> AppSc
     let draft_timetable_repo = DraftTimetableRepository::new(pool.clone());
     let published_timetable_repo = PublishedTimetableRepository::new(pool.clone());
     let draft_entry_repo = DraftEntryRepository::new(pool.clone());
+    let auth_repo = AuthRepository::new(pool.clone());
     
     let user_service = UserService::new(user_repo.clone());
     let resource_service = ResourceService::new(resource_repo.clone());
@@ -51,7 +59,7 @@ pub fn create_schema(pool: sqlx::PgPool, broadcaster: Arc<Broadcaster>) -> AppSc
         room_repo,
         time_slot_repo.clone(),
         timetable_entry_repo,
-        user_repo,
+        user_repo.clone(),
     );
     let availability_service = Arc::new(AvailabilityService::new(availability_repo));
     let draft_entry_service = Arc::new(DraftEntryService::new(draft_entry_repo));
@@ -67,6 +75,7 @@ pub fn create_schema(pool: sqlx::PgPool, broadcaster: Arc<Broadcaster>) -> AppSc
         draft_timetable_service.clone(),
         conflict_service.clone(),
     );
+    let auth_service = AuthService::new(auth_repo, user_repo.clone(), config, oidc_client);
 
     Schema::build(Query, Mutation, EmptySubscription)
         .data(pool)
@@ -84,5 +93,6 @@ pub fn create_schema(pool: sqlx::PgPool, broadcaster: Arc<Broadcaster>) -> AppSc
         .data(draft_timetable_service)
         .data(draft_entry_service)
         .data(published_timetable_service)
+        .data(auth_service)
         .finish()
 }

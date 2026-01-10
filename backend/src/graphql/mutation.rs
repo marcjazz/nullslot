@@ -2,13 +2,16 @@ use async_graphql::{Context, Object, InputObject, Result};
 use chrono::NaiveTime;
 use uuid::Uuid;
 use crate::models::{Resource, Token, Course, Room, TimeSlot, TimetableEntry, Substitution, User, UserRole};
-use crate::graphql::types::{Availability, AvailabilityInput, DraftTimetable, DraftTimetableInput, Conflict};
+use crate::graphql::types::{
+    Availability, AvailabilityInput, DraftTimetable, DraftTimetableInput, Conflict,
+    RequestMagicLinkInput, LoginWithMagicLinkInput, LoginPayload
+};
 use crate::models::conflicts::ConflictStatus;
 use crate::service::{
     UserService, ResourceService, CourseService, RoomService,
     TimeSlotService, TimetableEntryService, SubstitutionService,
     AvailabilityService, ConflictService, DraftTimetableService,
-    DraftEntryService, PublishedTimetableService
+    DraftEntryService, PublishedTimetableService, AuthService
 };
 use crate::error::AppError;
 
@@ -236,5 +239,20 @@ impl Mutation {
     async fn publish_timetable(&self, ctx: &Context<'_>, draft_timetable_id: Uuid) -> Result<crate::graphql::types::PublishedTimetable> {
         let service = ctx.data::<PublishedTimetableService>()?;
         Ok(service.publish_timetable(draft_timetable_id).await?)
+    }
+
+    async fn request_magic_link(&self, ctx: &Context<'_>, input: RequestMagicLinkInput) -> Result<String> {
+        let service = ctx.data::<AuthService>()?;
+        Ok(service.request_magic_link(&input.email).await?)
+    }
+
+    async fn login_with_magic_link(&self, ctx: &Context<'_>, input: LoginWithMagicLinkInput) -> Result<LoginPayload> {
+        let service = ctx.data::<AuthService>()?;
+        let (token, user) = service.login_with_magic_link(&input.token).await?;
+        
+        Ok(LoginPayload {
+            token,
+            user,
+        })
     }
 }

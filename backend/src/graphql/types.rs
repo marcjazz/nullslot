@@ -1,6 +1,7 @@
-use async_graphql::InputObject;
+use async_graphql::{InputObject, SimpleObject};
 use uuid::Uuid;
 use chrono::NaiveTime;
+pub use crate::models::User;
 pub use crate::models::availability::Availability;
 pub use crate::models::conflicts::{Conflict, ConflictStatus, ConflictSeverity};
 pub use crate::models::draft_timetables::{DraftTimetable, DraftTimetableStatus};
@@ -32,4 +33,20 @@ pub struct DraftEntryInput {
     pub teacher_id: Uuid,
     pub room_id: Uuid,
     pub time_slot_id: Uuid,
+}
+
+#[derive(InputObject)]
+pub struct RequestMagicLinkInput {
+    pub email: String,
+}
+
+#[derive(InputObject)]
+pub struct LoginWithMagicLinkInput {
+    pub token: String,
+}
+
+#[derive(SimpleObject)]
+pub struct LoginPayload {
+    pub token: String,
+    pub user: User,
 }

@@ -10,15 +10,19 @@ anyhow = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "chrono", "uuid", "json"] }
-jsonwebtoken = "9"
+jsonwebtoken = "8.3"
+openidconnect = { version = "2.2", features = ["reqwest"] }
 chrono = { version = "0.4", features = ["serde"] }
 uuid = { version = "1.0", features = ["v4", "serde"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tower-http = { version = "0.5", features = ["trace", "cors"] }
-argon2 = "0.5"
+argon2 = "0.4"
+rand_core = { version = "0.6", features = ["std"] }
 thiserror = "1.0"
 async-trait = "0.1"
 dotenvy = "0.15"
 async-graphql = { version = "7.0", features = ["chrono", "uuid"] }
 async-graphql-axum = "7.0"
+rand = "0.9.2"
+reqwest = { version = "0.13.1", features = ["json"] }

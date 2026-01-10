@@ -14,6 +14,7 @@ pub mod draft_timetables;
 pub mod published_timetables;
 pub mod draft_entries;
 
+pub use auth::AuthService;
 pub use users::UserService;
 pub use resources::ResourceService;
 pub use courses::CourseService;

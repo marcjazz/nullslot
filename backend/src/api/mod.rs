@@ -1,30 +1,36 @@
 pub mod health;
+pub mod auth;
 
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
 use axum::{routing::get, Extension, Router};
-use std::sync::Arc;
 
 use crate::graphql::AppSchema;
-use crate::ws::Broadcaster;
+use crate::AppState;
 
-pub fn router(schema: AppSchema, broadcaster: Arc<Broadcaster>) -> Router {
+pub fn router(
+    schema: AppSchema,
+    state: AppState,
+) -> Router {
     Router::new()
-        .nest("/api/v1", health::router::<Arc<Broadcaster>>())
+        .nest("/api/v1", health::router::<AppState>())
+        .route("/auth/oidc/login", get(auth::oidc_login_handler))
+        .route("/auth/oidc/callback", get(auth::oidc_callback_handler))
         .route("/graphql", get(graphql_playground).post(graphql_handler))
         .route("/ws", get(crate::ws::ws_handler))
         .layer(Extension(schema))
-        .with_state(broadcaster)
+        .with_state(state)
 }
 
 async fn graphql_handler(
     schema: Extension<AppSchema>,
+    claims: Option<axum::extract::Extension<crate::service::auth::Claims>>,
     req: GraphQLRequest,
 ) -> GraphQLResponse {
-    // For now, we mock an unauthenticated user.
-    // In a real app, this would be extracted from a JWT token in the header.
-    let user: Option<crate::models::User> = None;
-    let request = req.into_inner().data(user);
+    let mut request = req.into_inner();
+    if let Some(axum::extract::Extension(claims)) = claims {
+        request = request.data(claims);
+    }
     schema.execute(request).await.into()
 }
 

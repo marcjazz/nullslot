@@ -1,4 +1,4 @@
-use backend::{api, graphql, ws::Broadcaster};
+use backend::{api, config::Config, graphql, oidc, ws::Broadcaster, AppState};
 use sqlx::postgres::PgPoolOptions;
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -8,6 +8,8 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 async fn main() -> anyhow::Result<()> {
     // Load environment variables
     dotenvy::dotenv().ok();
+
+    let config = Arc::new(Config::from_env());
 
     // Initialize tracing
     tracing_subscriber::registry()
@@ -35,11 +37,22 @@ async fn main() -> anyhow::Result<()> {
     // Create Broadcaster for WebSockets
     let broadcaster = Arc::new(Broadcaster::new(1024));
 
+    // Discover OIDC client
+    let oidc_client = Arc::new(oidc::discover_oidc_client(&config).await?);
+
     // Create GraphQL schema
-    let schema = graphql::create_schema(pool, broadcaster.clone());
+    let schema = graphql::create_schema(pool, broadcaster.clone(), config.clone(), oidc_client.clone());
+
+    // Create AppState
+    let state = AppState {
+        broadcaster: broadcaster.clone(),
+        config: config.clone(),
+        oidc_client,
+    };
 
     // Setup router
-    let app = api::router(schema, broadcaster);
+    let app = api::router(schema, state.clone())
+        .layer(axum::middleware::from_fn_with_state(state, backend::middleware::auth::auth));
 
     // Define address
     let addr = SocketAddr::from(([127, 0, 0, 1], 8080));

@@ -2,9 +2,9 @@ pub mod availability;
 pub mod conflicts;
 pub mod draft_entries;
 pub mod draft_timetables;
+pub mod magic_link;
 pub mod published_timetables;
 pub mod snapshot;
-
 use async_graphql::Enum;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -14,6 +14,7 @@ pub use availability::Availability;
 pub use conflicts::{Conflict, ConflictSeverity, ConflictStatus};
 pub use draft_entries::DraftEntry;
 pub use draft_timetables::{DraftTimetable, DraftTimetableStatus};
+pub use magic_link::MagicLink;
 pub use published_timetables::PublishedTimetable;
 
 #[derive(Debug, Serialize, Deserialize, Clone, async_graphql::SimpleObject)]
