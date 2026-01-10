@@ -1,0 +1,25 @@
+# See https://rust-lang.github.io/rustfmt/?version=v1.7.0&search=
+
+# Not yet supported, see https://github.com/rust-lang/rustfmt/pull/5886
+#trailing_comma = "Always"
+
+# Not yet supported, see https://github.com/rust-lang/rustfmt/issues/5339
+#blank_lines_upper_bound = 2
+
+# Not yet supported, see https://github.com/rust-lang/rustfmt/pull/5766
+#format_code_in_doc_comments = true
+
+edition = "2021"
+# Not an option, but documents that we would like to enforce this.
+# See https://github.com/rust-lang/rustfmt/issues/5383
+#brace_style = "AlwaysNextLine"
+
+# We'd like to use this, but it is unstable.
+# See https://github.com/rust-lang/rustfmt/issues/3346
+#group_imports = "StdExternalCrate"
+
+use_field_init_shorthand = true
+use_try_shorthand = true
+
+# Unstable, see https://github.com/rust-lang/rustfmt/issues/5412
+#wrap_comments = true

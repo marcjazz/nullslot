@@ -1,0 +1,6 @@
+# we want to be pedantic, but we don't want to fail the build on warnings
+# so we allow all the pedantic warnings, and then we can override them
+# on a case-by-case basis.
+#
+# See https://doc.rust-lang.org/nightly/clippy/continuous_integration/index.html#suggested-setup-for-a-library-or-application
+#![allow(clippy::pedantic)]
