@@ -2,9 +2,13 @@ use async_graphql::{Context, Object, InputObject, Result};
 use chrono::NaiveTime;
 use uuid::Uuid;
 use crate::models::{Resource, Token, Course, Room, TimeSlot, TimetableEntry, Substitution, User, UserRole};
+use crate::graphql::types::{Availability, AvailabilityInput, DraftTimetable, DraftTimetableInput, Conflict};
+use crate::models::conflicts::ConflictStatus;
 use crate::service::{
-    UserService, ResourceService, CourseService, RoomService, 
-    TimeSlotService, TimetableEntryService, SubstitutionService
+    UserService, ResourceService, CourseService, RoomService,
+    TimeSlotService, TimetableEntryService, SubstitutionService,
+    AvailabilityService, ConflictService, DraftTimetableService,
+    DraftEntryService, PublishedTimetableService
 };
 use crate::error::AppError;
 
@@ -205,5 +209,32 @@ impl Mutation {
         
         let service = ctx.data::<SubstitutionService>()?;
         Ok(service.reject_substitution(substitution_id).await?)
+    }
+
+    async fn add_availability(&self, ctx: &Context<'_>, input: AvailabilityInput) -> Result<Availability> {
+        let service = ctx.data::<AvailabilityService>()?;
+        Ok(service.submit_availability(input).await?)
+    }
+
+    async fn resolve_conflict(&self, ctx: &Context<'_>, conflict_id: Uuid, status: ConflictStatus) -> Result<Conflict> {
+        let service = ctx.data::<ConflictService>()?;
+        Ok(service.resolve_conflict(conflict_id, status).await?)
+    }
+
+    async fn save_draft_timetable(&self, ctx: &Context<'_>, input: DraftTimetableInput) -> Result<DraftTimetable> {
+        let draft_service = ctx.data::<DraftTimetableService>()?;
+        let entry_service = ctx.data::<DraftEntryService>()?;
+        
+        let entries = input.entries.clone();
+        let draft = draft_service.create_draft_timetable(input).await?;
+        
+        entry_service.add_entries_to_draft(draft.id, entries).await?;
+        
+        Ok(draft)
+    }
+
+    async fn publish_timetable(&self, ctx: &Context<'_>, draft_timetable_id: Uuid) -> Result<crate::graphql::types::PublishedTimetable> {
+        let service = ctx.data::<PublishedTimetableService>()?;
+        Ok(service.publish_timetable(draft_timetable_id).await?)
     }
 }

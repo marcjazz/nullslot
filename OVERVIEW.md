@@ -12,8 +12,8 @@ Perfect — let’s map out a **fast, modern, resilient timetable system** with 
                         │
                         ▼
           ┌───────────────────────────┐
-          │  GraphQL API       │
-          │  Rust Backend (Actix)│
+          │  GraphQL API              │
+          │  Rust Backend (Actix)     │
           │ - Auth & Roles            │
           │ - Timetable CRUD          │
           │ - Substitution workflow   │

@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS snapshots (
+    id UUID PRIMARY KEY,
+    data JSONB NOT NULL,
+    version INT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

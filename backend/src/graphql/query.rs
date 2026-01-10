@@ -1,10 +1,13 @@
 use async_graphql::{Context, Object, Result};
 use uuid::Uuid;
+use chrono::NaiveDate;
 use crate::models::{User, Resource, Course, Room, TimeSlot, TimetableEntry, Substitution, snapshot::TimetableSnapshot};
+use crate::graphql::types::{Availability, Conflict, DraftTimetable, PublishedTimetable};
 use crate::service::{
     UserService, ResourceService, CourseService, RoomService,
     TimeSlotService, TimetableEntryService, SubstitutionService,
-    SnapshotService
+    SnapshotService, AvailabilityService, ConflictService,
+    DraftTimetableService, PublishedTimetableService
 };
 
 pub struct Query;
@@ -84,5 +87,30 @@ impl Query {
     async fn timetable_snapshot(&self, ctx: &Context<'_>) -> Result<TimetableSnapshot> {
         let service = ctx.data::<SnapshotService>()?;
         Ok(service.get_timetable_snapshot().await?)
+    }
+
+    async fn availability(&self, ctx: &Context<'_>, teacher_id: Uuid, date: NaiveDate) -> Result<Vec<Availability>> {
+        let service = ctx.data::<AvailabilityService>()?;
+        Ok(service.get_availability(teacher_id, date).await?)
+    }
+
+    async fn conflicts(&self, ctx: &Context<'_>, draft_timetable_id: Uuid) -> Result<Vec<Conflict>> {
+        let service = ctx.data::<ConflictService>()?;
+        Ok(service.get_conflicts(draft_timetable_id).await?)
+    }
+
+    async fn draft_timetable(&self, ctx: &Context<'_>, id: Uuid) -> Result<Option<DraftTimetable>> {
+        let service = ctx.data::<DraftTimetableService>()?;
+        Ok(service.get_draft_timetable(id).await?)
+    }
+
+    async fn published_timetable(&self, ctx: &Context<'_>, id: Uuid) -> Result<Option<PublishedTimetable>> {
+        let service = ctx.data::<PublishedTimetableService>()?;
+        Ok(service.get_published_timetable(id).await?)
+    }
+
+    async fn latest_published_timetable(&self, ctx: &Context<'_>) -> Result<Option<PublishedTimetable>> {
+        let service = ctx.data::<PublishedTimetableService>()?;
+        Ok(service.get_latest_published_timetable().await?)
     }
 }
