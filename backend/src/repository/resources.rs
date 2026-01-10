@@ -3,6 +3,7 @@ use uuid::Uuid;
 use crate::models::Resource;
 use crate::error::AppResult;
 
+#[derive(Clone)]
 pub struct ResourceRepository {
     pool: PgPool,
 }

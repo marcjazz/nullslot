@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n            SELECT id, username, email, hashed_password, role as \"role: UserRole\", created_at, updated_at\n            FROM users\n            WHERE email = $1\n            ",
+  "query": "\n            SELECT id, timetable_entry_id, substituting_teacher_id, status as \"status: SubstitutionStatus\", created_at, updated_at\n            FROM substitutions\n            WHERE id = $1\n            ",
   "describe": {
     "columns": [
       {
@@ -10,60 +10,54 @@
       },
       {
         "ordinal": 1,
-        "name": "username",
-        "type_info": "Text"
+        "name": "timetable_entry_id",
+        "type_info": "Uuid"
       },
       {
         "ordinal": 2,
-        "name": "email",
-        "type_info": "Text"
+        "name": "substituting_teacher_id",
+        "type_info": "Uuid"
       },
       {
         "ordinal": 3,
-        "name": "hashed_password",
-        "type_info": "Text"
-      },
-      {
-        "ordinal": 4,
-        "name": "role: UserRole",
+        "name": "status: SubstitutionStatus",
         "type_info": {
           "Custom": {
-            "name": "user_role",
+            "name": "substitution_status",
             "kind": {
               "Enum": [
-                "Admin",
-                "User",
-                "Teacher"
+                "Pending",
+                "Accepted",
+                "Rejected"
               ]
             }
           }
         }
       },
       {
-        "ordinal": 5,
+        "ordinal": 4,
         "name": "created_at",
         "type_info": "Timestamptz"
       },
       {
-        "ordinal": 6,
+        "ordinal": 5,
         "name": "updated_at",
         "type_info": "Timestamptz"
       }
     ],
     "parameters": {
       "Left": [
-        "Text"
+        "Uuid"
       ]
     },
     "nullable": [
       false,
       false,
-      false,
-      false,
+      true,
       false,
       false,
       false
     ]
   },
-  "hash": "5a506fef7815a3f3c80dc0e7a8470dc7355c153e0233fefd15b62d3c24e6608a"
+  "hash": "79fde80df448fb681648bc88ff280db56763f60251081c042ed52eefeea9640f"
 }

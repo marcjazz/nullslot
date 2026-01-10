@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n            SELECT id, username, email, hashed_password, role as \"role: UserRole\", created_at, updated_at\n            FROM users\n            ORDER BY created_at DESC\n            ",
+  "query": "\n            SELECT id, timetable_entry_id, substituting_teacher_id, status as \"status: SubstitutionStatus\", created_at, updated_at\n            FROM substitutions\n            ORDER BY created_at DESC\n            ",
   "describe": {
     "columns": [
       {
@@ -10,42 +10,37 @@
       },
       {
         "ordinal": 1,
-        "name": "username",
-        "type_info": "Text"
+        "name": "timetable_entry_id",
+        "type_info": "Uuid"
       },
       {
         "ordinal": 2,
-        "name": "email",
-        "type_info": "Text"
+        "name": "substituting_teacher_id",
+        "type_info": "Uuid"
       },
       {
         "ordinal": 3,
-        "name": "hashed_password",
-        "type_info": "Text"
-      },
-      {
-        "ordinal": 4,
-        "name": "role: UserRole",
+        "name": "status: SubstitutionStatus",
         "type_info": {
           "Custom": {
-            "name": "user_role",
+            "name": "substitution_status",
             "kind": {
               "Enum": [
-                "Admin",
-                "User",
-                "Teacher"
+                "Pending",
+                "Accepted",
+                "Rejected"
               ]
             }
           }
         }
       },
       {
-        "ordinal": 5,
+        "ordinal": 4,
         "name": "created_at",
         "type_info": "Timestamptz"
       },
       {
-        "ordinal": 6,
+        "ordinal": 5,
         "name": "updated_at",
         "type_info": "Timestamptz"
       }
@@ -56,12 +51,11 @@
     "nullable": [
       false,
       false,
-      false,
-      false,
+      true,
       false,
       false,
       false
     ]
   },
-  "hash": "af940fafccd2c26d4d23ad6be693c10a0fd32b42c8ddd591c8a725b4c1ea4ad3"
+  "hash": "12ec4aabc975fb62a6ae79bae980d603e973debc13048cac549b3041a5784832"
 }

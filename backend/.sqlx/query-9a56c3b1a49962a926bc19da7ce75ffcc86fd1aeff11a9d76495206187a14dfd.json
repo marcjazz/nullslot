@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE time_slots\n            SET day_of_week = $2, start_time = $3, end_time = $4, updated_at = NOW()\n            WHERE id = $1\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int4",
+        "Time",
+        "Time"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9a56c3b1a49962a926bc19da7ce75ffcc86fd1aeff11a9d76495206187a14dfd"
+}

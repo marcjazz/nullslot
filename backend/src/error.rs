@@ -13,8 +13,8 @@ pub enum AppError {
     BadRequest(String),
     #[error("Unauthorized")]
     Unauthorized,
-    #[error("Forbidden")]
-    Forbidden,
+    #[error("Forbidden: {0}")]
+    Forbidden(String),
     #[error("Not found")]
     NotFound,
     #[error("Conflict: {0}")]
@@ -45,7 +45,7 @@ impl IntoResponse for AppError {
         let (status, code, message) = match self {
             AppError::BadRequest(msg) => (StatusCode::BAD_REQUEST, "bad_request", msg),
             AppError::Unauthorized => (StatusCode::UNAUTHORIZED, "unauthorized", "Unauthorized".to_string()),
-            AppError::Forbidden => (StatusCode::FORBIDDEN, "forbidden", "Forbidden".to_string()),
+            AppError::Forbidden(msg) => (StatusCode::FORBIDDEN, "forbidden", msg),
             AppError::NotFound => (StatusCode::NOT_FOUND, "not_found", "Not found".to_string()),
             AppError::Conflict(msg) => (StatusCode::CONFLICT, "conflict", msg),
             AppError::UnprocessableEntity(msg) => (
@@ -89,7 +89,7 @@ impl ErrorExtensions for AppError {
             let code = match self {
                 AppError::BadRequest(_) => "BAD_REQUEST",
                 AppError::Unauthorized => "UNAUTHORIZED",
-                AppError::Forbidden => "FORBIDDEN",
+                AppError::Forbidden(_) => "FORBIDDEN",
                 AppError::NotFound => "NOT_FOUND",
                 AppError::Conflict(_) => "CONFLICT",
                 AppError::UnprocessableEntity(_) => "UNPROCESSABLE_ENTITY",

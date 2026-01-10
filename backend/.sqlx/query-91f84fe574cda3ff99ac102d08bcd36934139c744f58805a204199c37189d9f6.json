@@ -32,7 +32,8 @@
             "kind": {
               "Enum": [
                 "Admin",
-                "User"
+                "User",
+                "Teacher"
               ]
             }
           }

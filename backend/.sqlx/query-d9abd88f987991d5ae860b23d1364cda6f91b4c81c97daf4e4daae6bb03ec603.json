@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE timetable_entries\n            SET course_id = $2, room_id = $3, time_slot_id = $4, teacher_id = $5, updated_at = NOW()\n            WHERE id = $1\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d9abd88f987991d5ae860b23d1364cda6f91b4c81c97daf4e4daae6bb03ec603"
+}

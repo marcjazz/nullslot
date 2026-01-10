@@ -1,6 +1,20 @@
 pub mod auth;
 pub mod users;
 pub mod resources;
+pub mod courses;
+pub mod rooms;
+pub mod time_slots;
+pub mod timetable_entries;
+pub mod substitutions;
+pub mod notifications;
+pub mod snapshots;
 
 pub use users::UserService;
 pub use resources::ResourceService;
+pub use courses::CourseService;
+pub use rooms::RoomService;
+pub use time_slots::TimeSlotService;
+pub use timetable_entries::TimetableEntryService;
+pub use substitutions::SubstitutionService;
+pub use notifications::NotificationService;
+pub use snapshots::SnapshotService;

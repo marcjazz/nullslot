@@ -1,6 +1,7 @@
-use backend::{api, graphql};
+use backend::{api, graphql, ws::Broadcaster};
 use sqlx::postgres::PgPoolOptions;
 use std::net::SocketAddr;
+use std::sync::Arc;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 #[tokio::main]
@@ -31,11 +32,14 @@ async fn main() -> anyhow::Result<()> {
 
     tracing::info!("Database migrations completed successfully");
 
+    // Create Broadcaster for WebSockets
+    let broadcaster = Arc::new(Broadcaster::new(1024));
+
     // Create GraphQL schema
-    let schema = graphql::create_schema(pool);
+    let schema = graphql::create_schema(pool, broadcaster.clone());
 
     // Setup router
-    let app = api::router(schema);
+    let app = api::router(schema, broadcaster);
 
     // Define address
     let addr = SocketAddr::from(([127, 0, 0, 1], 8080));

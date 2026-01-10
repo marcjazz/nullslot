@@ -1,0 +1,27 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE substitutions\n            SET substituting_teacher_id = $2, status = $3, updated_at = NOW()\n            WHERE id = $1\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        {
+          "Custom": {
+            "name": "substitution_status",
+            "kind": {
+              "Enum": [
+                "Pending",
+                "Accepted",
+                "Rejected"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "65ff819a099f73f61f52288b61bc6cbbc8dbdedbdcf61b4ac5004bbefeab30ae"
+}

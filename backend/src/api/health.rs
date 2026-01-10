@@ -12,7 +12,10 @@ pub struct StatusResponse {
     pub environment: String,
 }
 
-pub fn router() -> Router {
+pub fn router<S>() -> Router<S>
+where
+    S: Clone + Send + Sync + 'static,
+{
     Router::new()
         .route("/health", get(health))
         .route("/status", get(status))

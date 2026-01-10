@@ -1,7 +1,9 @@
+pub mod snapshot;
+
 use async_graphql::Enum;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Utc, NaiveTime};
 
 #[derive(Debug, Serialize, Deserialize, Clone, async_graphql::SimpleObject)]
 pub struct User {
@@ -15,11 +17,70 @@ pub struct User {
     pub updated_at: DateTime<Utc>,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone, async_graphql::SimpleObject)]
+pub struct Course {
+    pub id: Uuid,
+    pub code: String,
+    pub name: String,
+    pub description: Option<String>,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, async_graphql::SimpleObject)]
+pub struct Room {
+    pub id: Uuid,
+    pub name: String,
+    pub capacity: i32,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, async_graphql::SimpleObject)]
+pub struct TimeSlot {
+    pub id: Uuid,
+    pub day_of_week: i32,
+    pub start_time: NaiveTime,
+    pub end_time: NaiveTime,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, async_graphql::SimpleObject)]
+pub struct TimetableEntry {
+    pub id: Uuid,
+    pub course_id: Uuid,
+    pub room_id: Uuid,
+    pub time_slot_id: Uuid,
+    pub teacher_id: Uuid,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Enum, sqlx::Type)]
 #[sqlx(type_name = "user_role")]
 pub enum UserRole {
     Admin,
+    Teacher,
     User,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Enum, sqlx::Type)]
+#[sqlx(type_name = "substitution_status")]
+pub enum SubstitutionStatus {
+    Pending,
+    Accepted,
+    Rejected,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, async_graphql::SimpleObject)]
+pub struct Substitution {
+    pub id: Uuid,
+    pub timetable_entry_id: Uuid,
+    pub substituting_teacher_id: Option<Uuid>,
+    pub status: SubstitutionStatus,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, async_graphql::SimpleObject)]

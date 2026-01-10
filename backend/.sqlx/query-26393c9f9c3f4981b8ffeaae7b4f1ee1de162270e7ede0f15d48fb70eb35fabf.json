@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            INSERT INTO substitutions (id, timetable_entry_id, substituting_teacher_id, status, created_at, updated_at)\n            VALUES ($1, $2, $3, $4, $5, $6)\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        {
+          "Custom": {
+            "name": "substitution_status",
+            "kind": {
+              "Enum": [
+                "Pending",
+                "Accepted",
+                "Rejected"
+              ]
+            }
+          }
+        },
+        "Timestamptz",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "26393c9f9c3f4981b8ffeaae7b4f1ee1de162270e7ede0f15d48fb70eb35fabf"
+}
