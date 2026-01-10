@@ -27,7 +27,11 @@ impl ResourceRepository {
             resource.updated_at
         )
         .execute(&self.pool)
-        .await?;
+        .await
+        .map_err(|e| {
+            eprintln!("SQLx Error in ResourceRepository::create: {:?}", e);
+            e
+        })?;
 
         Ok(resource)
     }

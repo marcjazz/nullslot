@@ -14,6 +14,7 @@ pub struct RegisterInput {
 
 #[derive(InputObject)]
 pub struct CreateResourceInput {
+    pub owner_id: Uuid,
     pub name: String,
     pub description: Option<String>,
     pub metadata: serde_json::Value,
@@ -35,11 +36,9 @@ impl Mutation {
 
     async fn create_resource(&self, ctx: &Context<'_>, input: CreateResourceInput) -> Result<Resource> {
         let service = ctx.data::<ResourceService>()?;
-        // In a real app, get owner_id from authenticated user context
-        let owner_id = Uuid::nil(); // Placeholder
         
         let resource = service.create_resource(
-            owner_id,
+            input.owner_id,
             input.name,
             input.description,
             input.metadata,
