@@ -1,6 +1,6 @@
 use axum::{
-    extract::ws::{Message, WebSocket, WebSocketUpgrade},
     extract::State,
+    extract::ws::{Message, WebSocket, WebSocketUpgrade},
     response::IntoResponse,
 };
 use serde::{Deserialize, Serialize};
@@ -48,10 +48,8 @@ async fn handle_socket(mut socket: WebSocket, broadcaster: Arc<Broadcaster>) {
             msg = rx.recv() => {
                 match msg {
                     Ok(ws_msg) => {
-                        if let Ok(json) = serde_json::to_string(&ws_msg) {
-                            if socket.send(Message::Text(json.into())).await.is_err() {
-                                break;
-                            }
+                        if let Ok(json) = serde_json::to_string(&ws_msg) && socket.send(Message::Text(json.into())).await.is_err() {
+                            break;
                         }
                     }
                     Err(broadcast::error::RecvError::Lagged(_)) => {

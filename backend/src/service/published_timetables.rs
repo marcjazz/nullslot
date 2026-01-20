@@ -29,7 +29,7 @@ impl PublishedTimetableService {
 
     pub async fn publish_timetable(&self, draft_timetable_id: Uuid) -> AppResult<PublishedTimetable> {
         // 1. Fetch the draft timetable
-        let draft = self.draft_timetable_service.get_draft_timetable(draft_timetable_id).await?
+        let _draft = self.draft_timetable_service.get_draft_timetable(draft_timetable_id).await?
             .ok_or(AppError::NotFound)?;
 
         // 2. Fetch any conflicts and ensure they are all resolved

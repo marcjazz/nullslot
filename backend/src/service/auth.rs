@@ -151,7 +151,7 @@ impl AuthService {
     }
 
     pub async fn login_with_oidc_code(&self, code: &str) -> AppResult<(String, User)> {
-        use openidconnect::{AuthorizationCode, OAuth2TokenResponse, PkceCodeVerifier, TokenResponse};
+        use openidconnect::{AuthorizationCode, PkceCodeVerifier, TokenResponse};
 
         // 1. Exchange the code for an ID token
         // Note: Using a placeholder PKCE verifier as per instructions
