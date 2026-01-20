@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use async_graphql::{Context, Object, Result};
 use uuid::Uuid;
 use chrono::NaiveDate;
@@ -104,17 +106,17 @@ impl Query {
     }
 
     async fn availability(&self, ctx: &Context<'_>, teacher_id: Uuid, date: NaiveDate) -> Result<Vec<Availability>> {
-        let service = ctx.data::<AvailabilityService>()?;
+        let service = ctx.data::<Arc<AvailabilityService>>()?;
         Ok(service.get_availability(teacher_id, date).await?)
     }
 
     async fn conflicts(&self, ctx: &Context<'_>, draft_timetable_id: Uuid) -> Result<Vec<Conflict>> {
-        let service = ctx.data::<ConflictService>()?;
+        let service = ctx.data::<Arc<ConflictService>>()?;
         Ok(service.get_conflicts(draft_timetable_id).await?)
     }
 
     async fn draft_timetable(&self, ctx: &Context<'_>, id: Uuid) -> Result<Option<DraftTimetable>> {
-        let service = ctx.data::<DraftTimetableService>()?;
+        let service = ctx.data::<Arc<DraftTimetableService>>()?;
         let claims = ctx.data::<Claims>().map_err(|_| AppError::Unauthorized.extend())?;
         Ok(service.get_draft(claims.workspace_id, id).await?)
     }
@@ -131,7 +133,7 @@ impl Query {
 
     async fn my_workspaces(&self, ctx: &Context<'_>) -> Result<Vec<Workspace>> {
         let claims = ctx.data::<Claims>().map_err(|_| AppError::Unauthorized.extend())?;
-        let service = ctx.data::<WorkspaceService>()?;
+        let service = ctx.data::<Arc<WorkspaceService>>()?;
         Ok(service.get_user_workspaces(claims.sub).await?)
     }
 }

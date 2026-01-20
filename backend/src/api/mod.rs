@@ -4,6 +4,7 @@ pub mod auth;
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
 use axum::{
+    handler::Handler,
     http::HeaderMap,
     routing::get,
     Extension, Router,
@@ -17,12 +18,20 @@ pub fn router(
     schema: AppSchema,
     state: AppState,
 ) -> Router {
+    let auth_middleware = axum::middleware::from_fn_with_state(
+        state.clone(),
+        crate::middleware::auth::auth,
+    );
+
     Router::new()
         .nest("/api/v1", health::router::<AppState>())
         .route("/auth/oidc/login", get(auth::oidc_login_handler))
         .route("/auth/oidc/callback", get(auth::oidc_callback_handler))
-        .route("/graphql", get(graphql_playground).post(graphql_handler))
-        .route("/ws", get(crate::ws::ws_handler))
+        .route(
+            "/graphql",
+            get(graphql_playground).post(graphql_handler.layer(auth_middleware.clone())),
+        )
+        .route("/ws", get(crate::ws::ws_handler).layer(auth_middleware))
         .layer(Extension(schema))
         .with_state(state)
 }

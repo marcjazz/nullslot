@@ -51,8 +51,7 @@ async fn main() -> anyhow::Result<()> {
     };
 
     // Setup router
-    let app = api::router(schema, state.clone())
-        .layer(axum::middleware::from_fn_with_state(state, backend::middleware::auth::auth));
+    let app = api::router(schema, state);
 
     // Define address
     let addr = SocketAddr::from(([127, 0, 0, 1], 8080));

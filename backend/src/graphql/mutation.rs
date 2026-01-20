@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use async_graphql::{Context, ErrorExtensions, InputObject, Object, Result};
 use chrono::NaiveTime;
 use uuid::Uuid;
@@ -223,19 +225,19 @@ impl Mutation {
     }
 
     async fn add_availability(&self, ctx: &Context<'_>, input: AvailabilityInput) -> Result<Availability> {
-        let service = ctx.data::<AvailabilityService>()?;
+        let service = ctx.data::<Arc<AvailabilityService>>()?;
         let claims = ctx.data::<Claims>().map_err(|_| AppError::Unauthorized.extend())?;
         Ok(service.submit_availability(claims.workspace_id, input).await?)
     }
 
     async fn resolve_conflict(&self, ctx: &Context<'_>, conflict_id: Uuid, status: ConflictStatus) -> Result<Conflict> {
-        let service = ctx.data::<ConflictService>()?;
+        let service = ctx.data::<Arc<ConflictService>>()?;
         Ok(service.resolve_conflict(conflict_id, status).await?)
     }
 
     async fn save_draft_timetable(&self, ctx: &Context<'_>, input: DraftTimetableInput) -> Result<DraftTimetable> {
-        let draft_service = ctx.data::<DraftTimetableService>()?;
-        let entry_service = ctx.data::<DraftEntryService>()?;
+        let draft_service = ctx.data::<Arc<DraftTimetableService>>()?;
+        let entry_service = ctx.data::<Arc<DraftEntryService>>()?;
         let claims = ctx.data::<Claims>().map_err(|_| AppError::Unauthorized.extend())?;
         
         let entries = input.entries.clone();
@@ -269,19 +271,19 @@ impl Mutation {
 
     async fn create_workspace(&self, ctx: &Context<'_>, input: CreateWorkspaceInput) -> Result<Workspace> {
         let claims = ctx.data::<Claims>().map_err(|_| AppError::Unauthorized.extend())?;
-        let service = ctx.data::<WorkspaceService>()?;
+        let service = ctx.data::<Arc<WorkspaceService>>()?;
         Ok(service.create_workspace(claims.sub, input.name).await?)
     }
 
     async fn create_invite(&self, ctx: &Context<'_>, input: CreateInviteInput) -> Result<String> {
         let claims = ctx.data::<Claims>().map_err(|_| AppError::Unauthorized.extend())?;
-        let service = ctx.data::<WorkspaceService>()?;
+        let service = ctx.data::<Arc<WorkspaceService>>()?;
         Ok(service.create_invite(input.workspace_id, claims.sub, input.email, input.role).await?)
     }
 
     async fn accept_invite(&self, ctx: &Context<'_>, input: AcceptInviteInput) -> Result<bool> {
         let claims = ctx.data::<Claims>().map_err(|_| AppError::Unauthorized.extend())?;
-        let service = ctx.data::<WorkspaceService>()?;
+        let service = ctx.data::<Arc<WorkspaceService>>()?;
         service.accept_invite(claims.sub, input.token).await?;
         Ok(true)
     }
