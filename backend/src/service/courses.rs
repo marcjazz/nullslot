@@ -15,12 +15,14 @@ impl CourseService {
 
     pub async fn create_course(
         &self,
+        workspace_id: Uuid,
         code: String,
         name: String,
         description: Option<String>,
     ) -> AppResult<Course> {
         let course = Course {
             id: Uuid::new_v4(),
+            workspace_id,
             code,
             name,
             description,

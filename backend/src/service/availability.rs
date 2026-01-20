@@ -14,9 +14,10 @@ impl AvailabilityService {
         Self { repo }
     }
 
-    pub async fn submit_availability(&self, input: AvailabilityInput) -> AppResult<Availability> {
+    pub async fn submit_availability(&self, workspace_id: Uuid, input: AvailabilityInput) -> AppResult<Availability> {
         let availability = Availability {
             id: Uuid::new_v4(),
+            workspace_id,
             teacher_id: input.teacher_id,
             day_of_week: input.day_of_week,
             start_time: input.start_time,

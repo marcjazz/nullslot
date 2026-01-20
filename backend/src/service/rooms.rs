@@ -15,11 +15,13 @@ impl RoomService {
 
     pub async fn create_room(
         &self,
+        workspace_id: Uuid,
         name: String,
         capacity: i32,
     ) -> AppResult<Room> {
         let room = Room {
             id: Uuid::new_v4(),
+            workspace_id,
             name,
             capacity,
             created_at: Utc::now(),

@@ -16,10 +16,11 @@ impl RoomRepository {
     pub async fn create(&self, room: Room) -> AppResult<Room> {
         sqlx::query!(
             r#"
-            INSERT INTO rooms (id, name, capacity, created_at, updated_at)
-            VALUES ($1, $2, $3, $4, $5)
+            INSERT INTO rooms (id, workspace_id, name, capacity, created_at, updated_at)
+            VALUES ($1, $2, $3, $4, $5, $6)
             "#,
             room.id,
+            room.workspace_id,
             room.name,
             room.capacity,
             room.created_at,
@@ -35,7 +36,7 @@ impl RoomRepository {
         let room = sqlx::query_as!(
             Room,
             r#"
-            SELECT id, name, capacity, created_at, updated_at
+            SELECT id, workspace_id, name, capacity, created_at, updated_at
             FROM rooms
             WHERE id = $1
             "#,
@@ -51,7 +52,7 @@ impl RoomRepository {
         let rooms = sqlx::query_as!(
             Room,
             r#"
-            SELECT id, name, capacity, created_at, updated_at
+            SELECT id, workspace_id, name, capacity, created_at, updated_at
             FROM rooms
             ORDER BY name ASC
             "#

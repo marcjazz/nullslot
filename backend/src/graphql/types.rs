@@ -7,6 +7,7 @@ pub use crate::models::conflicts::{Conflict, ConflictStatus, ConflictSeverity};
 pub use crate::models::draft_timetables::{DraftTimetable, DraftTimetableStatus};
 pub use crate::models::published_timetables::PublishedTimetable;
 pub use crate::models::draft_entries::DraftEntry;
+pub use crate::models::workspace::{Workspace, WorkspaceMember, WorkspaceInvite, WorkspaceRole};
 
 #[derive(InputObject, Clone)]
 pub struct AvailabilityInput {
@@ -49,4 +50,21 @@ pub struct LoginWithMagicLinkInput {
 pub struct LoginPayload {
     pub token: String,
     pub user: User,
+}
+
+#[derive(InputObject)]
+pub struct CreateWorkspaceInput {
+    pub name: String,
+}
+
+#[derive(InputObject)]
+pub struct CreateInviteInput {
+    pub workspace_id: Uuid,
+    pub email: String,
+    pub role: WorkspaceRole,
+}
+
+#[derive(InputObject)]
+pub struct AcceptInviteInput {
+    pub token: String,
 }

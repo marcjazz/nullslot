@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n            SELECT id, code, name, description, created_at, updated_at\n            FROM courses\n            WHERE id = $1\n            ",
+  "query": "\n            SELECT w.id, w.name, w.domain_restriction, w.created_at, w.updated_at\n            FROM workspaces w\n            JOIN workspace_members wm ON w.id = wm.workspace_id\n            WHERE wm.user_id = $1\n            ORDER BY w.name ASC\n            ",
   "describe": {
     "columns": [
       {
@@ -10,26 +10,21 @@
       },
       {
         "ordinal": 1,
-        "name": "code",
-        "type_info": "Text"
-      },
-      {
-        "ordinal": 2,
         "name": "name",
         "type_info": "Text"
       },
       {
-        "ordinal": 3,
-        "name": "description",
+        "ordinal": 2,
+        "name": "domain_restriction",
         "type_info": "Text"
       },
       {
-        "ordinal": 4,
+        "ordinal": 3,
         "name": "created_at",
         "type_info": "Timestamptz"
       },
       {
-        "ordinal": 5,
+        "ordinal": 4,
         "name": "updated_at",
         "type_info": "Timestamptz"
       }
@@ -42,11 +37,10 @@
     "nullable": [
       false,
       false,
-      false,
       true,
       false,
       false
     ]
   },
-  "hash": "90745302e01baafed61d4effae88a9df269c7ac1c46c302156076b8d1fba8f7c"
+  "hash": "b9ae05a6222537a81439f195c04d5f6b8a99f0b5681508bc7deab97785af3069"
 }

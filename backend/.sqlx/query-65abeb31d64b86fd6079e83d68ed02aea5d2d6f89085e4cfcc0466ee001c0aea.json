@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n            INSERT INTO availability (id, teacher_id, day_of_week, start_time, end_time, is_preferred, created_at, updated_at)\n            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)\n            RETURNING id, teacher_id, day_of_week, start_time, end_time, is_preferred, created_at, updated_at\n            ",
+  "query": "\n            INSERT INTO availability (id, workspace_id, teacher_id, day_of_week, start_time, end_time, is_preferred, created_at, updated_at)\n            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)\n            RETURNING id, workspace_id, teacher_id, day_of_week, start_time, end_time, is_preferred, created_at, updated_at\n            ",
   "describe": {
     "columns": [
       {
@@ -10,42 +10,48 @@
       },
       {
         "ordinal": 1,
-        "name": "teacher_id",
+        "name": "workspace_id",
         "type_info": "Uuid"
       },
       {
         "ordinal": 2,
+        "name": "teacher_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
         "name": "day_of_week",
         "type_info": "Int4"
       },
       {
-        "ordinal": 3,
+        "ordinal": 4,
         "name": "start_time",
         "type_info": "Time"
       },
       {
-        "ordinal": 4,
+        "ordinal": 5,
         "name": "end_time",
         "type_info": "Time"
       },
       {
-        "ordinal": 5,
+        "ordinal": 6,
         "name": "is_preferred",
         "type_info": "Bool"
       },
       {
-        "ordinal": 6,
+        "ordinal": 7,
         "name": "created_at",
         "type_info": "Timestamptz"
       },
       {
-        "ordinal": 7,
+        "ordinal": 8,
         "name": "updated_at",
         "type_info": "Timestamptz"
       }
     ],
     "parameters": {
       "Left": [
+        "Uuid",
         "Uuid",
         "Uuid",
         "Int4",
@@ -64,8 +70,9 @@
       false,
       false,
       false,
+      false,
       false
     ]
   },
-  "hash": "422033da64129c3446f51d4ac9036eaca07e736f5c6a4c9a0ae0af9e6842d507"
+  "hash": "65abeb31d64b86fd6079e83d68ed02aea5d2d6f89085e4cfcc0466ee001c0aea"
 }

@@ -2,12 +2,14 @@ use async_graphql::{Context, Object, Result};
 use uuid::Uuid;
 use chrono::NaiveDate;
 use crate::models::{User, Resource, Course, Room, TimeSlot, TimetableEntry, Substitution, snapshot::TimetableSnapshot};
-use crate::graphql::types::{Availability, Conflict, DraftTimetable, PublishedTimetable};
+use crate::graphql::types::{
+    Availability, Conflict, DraftTimetable, PublishedTimetable, Workspace
+};
 use crate::service::{
     UserService, ResourceService, CourseService, RoomService,
     TimeSlotService, TimetableEntryService, SubstitutionService,
     SnapshotService, AvailabilityService, ConflictService,
-    DraftTimetableService, PublishedTimetableService,
+    DraftTimetableService, PublishedTimetableService, WorkspaceService,
     auth::Claims
 };
 use crate::error::AppError;
@@ -113,7 +115,8 @@ impl Query {
 
     async fn draft_timetable(&self, ctx: &Context<'_>, id: Uuid) -> Result<Option<DraftTimetable>> {
         let service = ctx.data::<DraftTimetableService>()?;
-        Ok(service.get_draft_timetable(id).await?)
+        let claims = ctx.data::<Claims>().map_err(|_| AppError::Unauthorized.extend())?;
+        Ok(service.get_draft(claims.workspace_id, id).await?)
     }
 
     async fn published_timetable(&self, ctx: &Context<'_>, id: Uuid) -> Result<Option<PublishedTimetable>> {
@@ -124,5 +127,11 @@ impl Query {
     async fn latest_published_timetable(&self, ctx: &Context<'_>) -> Result<Option<PublishedTimetable>> {
         let service = ctx.data::<PublishedTimetableService>()?;
         Ok(service.get_latest_published_timetable().await?)
+    }
+
+    async fn my_workspaces(&self, ctx: &Context<'_>) -> Result<Vec<Workspace>> {
+        let claims = ctx.data::<Claims>().map_err(|_| AppError::Unauthorized.extend())?;
+        let service = ctx.data::<WorkspaceService>()?;
+        Ok(service.get_user_workspaces(claims.sub).await?)
     }
 }

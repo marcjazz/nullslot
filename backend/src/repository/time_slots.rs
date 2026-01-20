@@ -16,10 +16,11 @@ impl TimeSlotRepository {
     pub async fn create(&self, time_slot: TimeSlot) -> AppResult<TimeSlot> {
         sqlx::query!(
             r#"
-            INSERT INTO time_slots (id, day_of_week, start_time, end_time, created_at, updated_at)
-            VALUES ($1, $2, $3, $4, $5, $6)
+            INSERT INTO time_slots (id, workspace_id, day_of_week, start_time, end_time, created_at, updated_at)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
             "#,
             time_slot.id,
+            time_slot.workspace_id,
             time_slot.day_of_week,
             time_slot.start_time,
             time_slot.end_time,
@@ -36,7 +37,7 @@ impl TimeSlotRepository {
         let time_slot = sqlx::query_as!(
             TimeSlot,
             r#"
-            SELECT id, day_of_week, start_time, end_time, created_at, updated_at
+            SELECT id, workspace_id, day_of_week, start_time, end_time, created_at, updated_at
             FROM time_slots
             WHERE id = $1
             "#,
@@ -52,7 +53,7 @@ impl TimeSlotRepository {
         let time_slots = sqlx::query_as!(
             TimeSlot,
             r#"
-            SELECT id, day_of_week, start_time, end_time, created_at, updated_at
+            SELECT id, workspace_id, day_of_week, start_time, end_time, created_at, updated_at
             FROM time_slots
             ORDER BY day_of_week ASC, start_time ASC
             "#

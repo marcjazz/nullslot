@@ -9,14 +9,15 @@ use crate::repository::{
     UserRepository, ResourceRepository, CourseRepository, RoomRepository,
     TimeSlotRepository, TimetableEntryRepository, SubstitutionRepository,
     AvailabilityRepository, ConflictRepository, DraftTimetableRepository,
-    PublishedTimetableRepository, DraftEntryRepository, AuthRepository
+    PublishedTimetableRepository, DraftEntryRepository, AuthRepository,
+    WorkspaceRepository
 };
 use crate::service::{
     UserService, ResourceService, CourseService, RoomService,
     TimeSlotService, TimetableEntryService, SubstitutionService,
     NotificationService, SnapshotService, AvailabilityService,
     ConflictService, DraftTimetableService, PublishedTimetableService,
-    DraftEntryService, AuthService
+    DraftEntryService, AuthService, WorkspaceService
 };
 
 pub type AppSchema = Schema<Query, Mutation, EmptySubscription>;
@@ -40,6 +41,7 @@ pub fn create_schema(
     let published_timetable_repo = PublishedTimetableRepository::new(pool.clone());
     let draft_entry_repo = DraftEntryRepository::new(pool.clone());
     let auth_repo = AuthRepository::new(pool.clone());
+    let workspace_repo = Arc::new(WorkspaceRepository::new(pool.clone()));
     
     let user_service = UserService::new(user_repo.clone());
     let resource_service = ResourceService::new(resource_repo.clone());
@@ -75,7 +77,14 @@ pub fn create_schema(
         draft_timetable_service.clone(),
         conflict_service.clone(),
     );
-    let auth_service = AuthService::new(auth_repo, user_repo.clone(), config, oidc_client);
+    let workspace_service = Arc::new(WorkspaceService::new(workspace_repo));
+    let auth_service = AuthService::new(
+        auth_repo,
+        user_repo.clone(),
+        config,
+        oidc_client,
+        workspace_service.clone(),
+    );
 
     Schema::build(Query, Mutation, EmptySubscription)
         .data(pool)
@@ -93,6 +102,7 @@ pub fn create_schema(
         .data(draft_timetable_service)
         .data(draft_entry_service)
         .data(published_timetable_service)
+        .data(workspace_service)
         .data(auth_service)
         .finish()
 }

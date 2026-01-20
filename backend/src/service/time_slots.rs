@@ -15,12 +15,14 @@ impl TimeSlotService {
 
     pub async fn create_time_slot(
         &self,
+        workspace_id: Uuid,
         day_of_week: i32,
         start_time: NaiveTime,
         end_time: NaiveTime,
     ) -> AppResult<TimeSlot> {
         let time_slot = TimeSlot {
             id: Uuid::new_v4(),
+            workspace_id,
             day_of_week,
             start_time,
             end_time,

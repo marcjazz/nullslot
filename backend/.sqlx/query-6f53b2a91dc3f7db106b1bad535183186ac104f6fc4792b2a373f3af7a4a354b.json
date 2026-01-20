@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n            SELECT id, teacher_id, day_of_week, start_time, end_time, is_preferred, created_at, updated_at\n            FROM availability\n            WHERE teacher_id = $1 AND day_of_week = $2\n            ",
+  "query": "\n            SELECT id, workspace_id, day_of_week, start_time, end_time, created_at, updated_at\n            FROM time_slots\n            ORDER BY day_of_week ASC, start_time ASC\n            ",
   "describe": {
     "columns": [
       {
@@ -10,7 +10,7 @@
       },
       {
         "ordinal": 1,
-        "name": "teacher_id",
+        "name": "workspace_id",
         "type_info": "Uuid"
       },
       {
@@ -30,28 +30,19 @@
       },
       {
         "ordinal": 5,
-        "name": "is_preferred",
-        "type_info": "Bool"
-      },
-      {
-        "ordinal": 6,
         "name": "created_at",
         "type_info": "Timestamptz"
       },
       {
-        "ordinal": 7,
+        "ordinal": 6,
         "name": "updated_at",
         "type_info": "Timestamptz"
       }
     ],
     "parameters": {
-      "Left": [
-        "Uuid",
-        "Int4"
-      ]
+      "Left": []
     },
     "nullable": [
-      false,
       false,
       false,
       false,
@@ -61,5 +52,5 @@
       false
     ]
   },
-  "hash": "2021b49664eaed46c7a7c854009793d5c33a57017a9901fc86501576ae1cef59"
+  "hash": "6f53b2a91dc3f7db106b1bad535183186ac104f6fc4792b2a373f3af7a4a354b"
 }

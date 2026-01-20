@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n            SELECT id, code, name, description, created_at, updated_at\n            FROM courses\n            ORDER BY code ASC\n            ",
+  "query": "\n            SELECT id, workspace_id, owner_id, name, description, metadata as \"metadata: serde_json::Value\", created_at, updated_at\n            FROM resources\n            ORDER BY created_at DESC\n            ",
   "describe": {
     "columns": [
       {
@@ -10,26 +10,36 @@
       },
       {
         "ordinal": 1,
-        "name": "code",
-        "type_info": "Text"
+        "name": "workspace_id",
+        "type_info": "Uuid"
       },
       {
         "ordinal": 2,
+        "name": "owner_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
         "name": "name",
         "type_info": "Text"
       },
       {
-        "ordinal": 3,
+        "ordinal": 4,
         "name": "description",
         "type_info": "Text"
       },
       {
-        "ordinal": 4,
+        "ordinal": 5,
+        "name": "metadata: serde_json::Value",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 6,
         "name": "created_at",
         "type_info": "Timestamptz"
       },
       {
-        "ordinal": 5,
+        "ordinal": 7,
         "name": "updated_at",
         "type_info": "Timestamptz"
       }
@@ -41,10 +51,12 @@
       false,
       false,
       false,
+      false,
       true,
+      false,
       false,
       false
     ]
   },
-  "hash": "a6ef0168a801c778b59d12ae79c98cf49448934f083a4507c020d861702cfde9"
+  "hash": "000b806bb47d910a81b9a2e94c90c4f3ef92f5b3f097c820ef5e142ff0c681fd"
 }

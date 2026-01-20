@@ -5,21 +5,24 @@ use crate::models::{User, UserRole};
 use crate::oidc::OidcClient;
 use crate::repository::{AuthRepository, UserRepository};
 use argon2::{
-    password_hash::{PasswordHasher, SaltString},
     Argon2,
+    password_hash::{PasswordHasher, SaltString},
 };
 use chrono::{Duration, Utc};
-use jsonwebtoken::{encode, EncodingKey, Header};
+use jsonwebtoken::{EncodingKey, Header, encode};
+use rand::Rng;
 use rand::distr::Alphanumeric;
-use rand::{rng, Rng};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+
+use crate::service::workspace::WorkspaceService;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Claims {
     pub sub: Uuid,
     pub role: UserRole,
     pub exp: i64,
+    pub workspace_id: Uuid, // Add workspace_id here
 }
 
 use std::sync::Arc;
@@ -29,6 +32,7 @@ pub struct AuthService {
     user_repo: UserRepository,
     config: Arc<Config>,
     oidc_client: Arc<OidcClient>,
+    workspace_service: Arc<WorkspaceService>,
 }
 
 impl AuthService {
@@ -37,12 +41,14 @@ impl AuthService {
         user_repo: UserRepository,
         config: Arc<Config>,
         oidc_client: Arc<OidcClient>,
+        workspace_service: Arc<WorkspaceService>,
     ) -> Self {
         Self {
             auth_repo,
             user_repo,
             config,
             oidc_client,
+            workspace_service,
         }
     }
 
@@ -55,7 +61,7 @@ impl AuthService {
             .ok_or(AppError::NotFound)?;
 
         // Generate a secure, random token
-        let token: String = rng()
+        let token: String = rand::rng() // Use thread_rng directly
             .sample_iter(&Alphanumeric)
             .take(32)
             .map(char::from)
@@ -109,7 +115,9 @@ impl AuthService {
 
         // Validate the token
         if magic_link.used {
-            return Err(AppError::BadRequest("Magic link has already been used".to_string()));
+            return Err(AppError::BadRequest(
+                "Magic link has already been used".to_string(),
+            ));
         }
 
         if magic_link.expires_at < Utc::now() {
@@ -126,13 +134,24 @@ impl AuthService {
             .await?
             .ok_or(AppError::NotFound)?;
 
+        // Ensure user has at least one workspace
+        let mut workspaces = self.workspace_service.get_user_workspaces(user.id).await?;
+        if workspaces.is_empty() {
+            let new_workspace = self
+                .workspace_service
+                .create_workspace(user.id, "Personal Workspace".to_string())
+                .await?;
+            workspaces.push(new_workspace);
+        }
+        let workspace_id = workspaces.first().unwrap().id; // Get the first workspace_id
+
         // Generate a JWT for the user
-        let jwt = self.create_jwt(user.id, user.role)?;
+        let jwt = self.create_jwt(user.id, user.role, workspace_id)?;
 
         Ok((jwt, user))
     }
 
-    fn create_jwt(&self, user_id: Uuid, role: UserRole) -> AppResult<String> {
+    fn create_jwt(&self, user_id: Uuid, role: UserRole, workspace_id: Uuid) -> AppResult<String> {
         let secret = &self.config.jwt_secret;
         let expiration = Utc::now() + Duration::hours(24);
 
@@ -140,6 +159,7 @@ impl AuthService {
             sub: user_id,
             role,
             exp: expiration.timestamp(),
+            workspace_id,
         };
 
         encode(
@@ -163,25 +183,34 @@ impl AuthService {
             .set_pkce_verifier(pkce_verifier)
             .request_async(openidconnect::reqwest::async_http_client)
             .await
-            .map_err(|e| AppError::InternalError(anyhow::anyhow!("Failed to exchange OIDC code: {}", e)))?;
+            .map_err(|e| {
+                AppError::InternalError(anyhow::anyhow!("Failed to exchange OIDC code: {}", e))
+            })?;
 
         // 2. Verify the ID token
-        let id_token = token_response
-            .id_token()
-            .ok_or_else(|| AppError::InternalError(anyhow::anyhow!("Server did not return an ID token")))?;
+        let id_token = token_response.id_token().ok_or_else(|| {
+            AppError::InternalError(anyhow::anyhow!("Server did not return an ID token"))
+        })?;
 
         // Note: For verification, we ideally need the nonce used during the auth URL generation.
         // Since we are not using sessions yet, we use a placeholder or skip strict nonce verification if possible.
         // The openidconnect crate requires a nonce for verification if it was provided in the auth request.
         // For now, we'll try to verify it.
         let claims = id_token
-            .claims(&self.oidc_client.id_token_verifier(), &openidconnect::Nonce::new("placeholder_nonce".to_string()))
-            .map_err(|e| AppError::InternalError(anyhow::anyhow!("Failed to verify ID token: {}", e)))?;
+            .claims(
+                &self.oidc_client.id_token_verifier(),
+                &openidconnect::Nonce::new("placeholder_nonce".to_string()),
+            )
+            .map_err(|e| {
+                AppError::InternalError(anyhow::anyhow!("Failed to verify ID token: {}", e))
+            })?;
 
         // 3. Extract the user's email
         let email = claims
             .email()
-            .ok_or_else(|| AppError::BadRequest("OIDC ID token does not contain an email claim".to_string()))?
+            .ok_or_else(|| {
+                AppError::BadRequest("OIDC ID token does not contain an email claim".to_string())
+            })?
             .as_str();
 
         // 4. Find or create the user
@@ -201,8 +230,19 @@ impl AuthService {
             }
         };
 
-        // 5. Generate a local JWT
-        let jwt = self.create_jwt(user.id, user.role)?;
+        // 5. Ensure user has at least one workspace
+        let mut workspaces = self.workspace_service.get_user_workspaces(user.id).await?;
+        if workspaces.is_empty() {
+            let new_workspace = self
+                .workspace_service
+                .create_workspace(user.id, "Personal Workspace".to_string())
+                .await?;
+            workspaces.push(new_workspace);
+        }
+        let workspace_id = workspaces.first().unwrap().id; // Get the first workspace_id
+
+        // 6. Generate a local JWT
+        let jwt = self.create_jwt(user.id, user.role, workspace_id)?;
 
         Ok((jwt, user))
     }

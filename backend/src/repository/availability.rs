@@ -18,11 +18,12 @@ impl Repository {
         let row = sqlx::query_as!(
             Availability,
             r#"
-            INSERT INTO availability (id, teacher_id, day_of_week, start_time, end_time, is_preferred, created_at, updated_at)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-            RETURNING id, teacher_id, day_of_week, start_time, end_time, is_preferred, created_at, updated_at
+            INSERT INTO availability (id, workspace_id, teacher_id, day_of_week, start_time, end_time, is_preferred, created_at, updated_at)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            RETURNING id, workspace_id, teacher_id, day_of_week, start_time, end_time, is_preferred, created_at, updated_at
             "#,
             availability.id,
+            availability.workspace_id,
             availability.teacher_id,
             availability.day_of_week,
             availability.start_time,
@@ -43,7 +44,7 @@ impl Repository {
         let rows = sqlx::query_as!(
             Availability,
             r#"
-            SELECT id, teacher_id, day_of_week, start_time, end_time, is_preferred, created_at, updated_at
+            SELECT id, workspace_id, teacher_id, day_of_week, start_time, end_time, is_preferred, created_at, updated_at
             FROM availability
             WHERE teacher_id = $1 AND day_of_week = $2
             "#,

@@ -6,6 +6,7 @@ use sqlx::FromRow;
 #[derive(Debug, Serialize, Deserialize, Clone, FromRow, async_graphql::SimpleObject)]
 pub struct PublishedTimetable {
     pub id: Uuid,
+    pub workspace_id: Uuid,
     pub draft_timetable_id: Uuid,
     pub published_at: DateTime<Utc>,
     pub valid_from: NaiveDate,

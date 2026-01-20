@@ -27,13 +27,13 @@ impl PublishedTimetableService {
         }
     }
 
-    pub async fn publish_timetable(&self, draft_timetable_id: Uuid) -> AppResult<PublishedTimetable> {
+    pub async fn publish_timetable(&self, workspace_id: Uuid, draft_timetable_id: Uuid) -> AppResult<PublishedTimetable> {
         // 1. Fetch the draft timetable
-        let _draft = self.draft_timetable_service.get_draft_timetable(draft_timetable_id).await?
+        let _draft = self.draft_timetable_service.get_draft(workspace_id, draft_timetable_id).await?
             .ok_or(AppError::NotFound)?;
 
         // 2. Fetch any conflicts and ensure they are all resolved
-        let conflicts = self.conflict_service.get_conflicts_for_draft(draft_timetable_id).await?;
+        let conflicts = self.conflict_service.get_conflicts_for_draft(draft_timetable_id).await?; // Assuming get_conflicts_for_draft doesn't need workspace_id
         if conflicts.iter().any(|c| c.status != ConflictStatus::Resolved) {
             return Err(AppError::UnprocessableEntity("Cannot publish timetable with unresolved conflicts".to_string()));
         }
@@ -42,6 +42,7 @@ impl PublishedTimetableService {
         let now = Utc::now();
         let published = PublishedTimetable {
             id: Uuid::new_v4(),
+            workspace_id,
             draft_timetable_id,
             published_at: now,
             // For now, using current date as placeholder for valid_from/to if not available in draft
@@ -55,7 +56,7 @@ impl PublishedTimetableService {
 
         // 4. Update the status of the original DraftTimetable
         self.draft_timetable_service
-            .update_draft_timetable_status(draft_timetable_id, DraftTimetableStatus::Published)
+            .update_draft_status(workspace_id, draft_timetable_id, DraftTimetableStatus::Published)
             .await?;
 
         Ok(published)

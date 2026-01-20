@@ -16,10 +16,11 @@ impl CourseRepository {
     pub async fn create(&self, course: Course) -> AppResult<Course> {
         sqlx::query!(
             r#"
-            INSERT INTO courses (id, code, name, description, created_at, updated_at)
-            VALUES ($1, $2, $3, $4, $5, $6)
+            INSERT INTO courses (id, workspace_id, code, name, description, created_at, updated_at)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
             "#,
             course.id,
+            course.workspace_id,
             course.code,
             course.name,
             course.description,
@@ -36,7 +37,7 @@ impl CourseRepository {
         let course = sqlx::query_as!(
             Course,
             r#"
-            SELECT id, code, name, description, created_at, updated_at
+            SELECT id, workspace_id, code, name, description, created_at, updated_at
             FROM courses
             WHERE id = $1
             "#,
@@ -52,7 +53,7 @@ impl CourseRepository {
         let courses = sqlx::query_as!(
             Course,
             r#"
-            SELECT id, code, name, description, created_at, updated_at
+            SELECT id, workspace_id, code, name, description, created_at, updated_at
             FROM courses
             ORDER BY code ASC
             "#

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n            SELECT id, owner_id, name, description, metadata as \"metadata: serde_json::Value\", created_at, updated_at\n            FROM resources\n            ORDER BY created_at DESC\n            ",
+  "query": "\n            SELECT id, workspace_id, owner_id, name, description, metadata as \"metadata: serde_json::Value\", created_at, updated_at\n            FROM resources\n            WHERE owner_id = $1\n            ORDER BY created_at DESC\n            ",
   "describe": {
     "columns": [
       {
@@ -10,39 +10,47 @@
       },
       {
         "ordinal": 1,
-        "name": "owner_id",
+        "name": "workspace_id",
         "type_info": "Uuid"
       },
       {
         "ordinal": 2,
+        "name": "owner_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
         "name": "name",
         "type_info": "Text"
       },
       {
-        "ordinal": 3,
+        "ordinal": 4,
         "name": "description",
         "type_info": "Text"
       },
       {
-        "ordinal": 4,
+        "ordinal": 5,
         "name": "metadata: serde_json::Value",
         "type_info": "Jsonb"
       },
       {
-        "ordinal": 5,
+        "ordinal": 6,
         "name": "created_at",
         "type_info": "Timestamptz"
       },
       {
-        "ordinal": 6,
+        "ordinal": 7,
         "name": "updated_at",
         "type_info": "Timestamptz"
       }
     ],
     "parameters": {
-      "Left": []
+      "Left": [
+        "Uuid"
+      ]
     },
     "nullable": [
+      false,
       false,
       false,
       false,
@@ -52,5 +60,5 @@
       false
     ]
   },
-  "hash": "7b385537963f336e0491510b4fde53e2335ed4d547cb84fc984dd6cca87a3fe0"
+  "hash": "d0a8e129c798bffca6cf306899a88d1d77147c2e13282e0eb3cf7394a901efc3"
 }

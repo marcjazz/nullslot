@@ -15,6 +15,7 @@ pub enum DraftTimetableStatus {
 #[derive(Debug, Serialize, Deserialize, Clone, FromRow, async_graphql::SimpleObject)]
 pub struct DraftTimetable {
     pub id: Uuid,
+    pub workspace_id: Uuid,
     pub name: String,
     pub term: String,
     pub year: i32,

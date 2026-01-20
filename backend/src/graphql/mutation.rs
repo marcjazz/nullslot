@@ -1,17 +1,20 @@
-use async_graphql::{Context, Object, InputObject, Result};
+use async_graphql::{Context, ErrorExtensions, InputObject, Object, Result};
 use chrono::NaiveTime;
 use uuid::Uuid;
 use crate::models::{Resource, Token, Course, Room, TimeSlot, TimetableEntry, Substitution, User, UserRole};
 use crate::graphql::types::{
     Availability, AvailabilityInput, DraftTimetable, DraftTimetableInput, Conflict,
-    RequestMagicLinkInput, LoginWithMagicLinkInput, LoginPayload
+    RequestMagicLinkInput, LoginWithMagicLinkInput, LoginPayload,
+    CreateWorkspaceInput, CreateInviteInput, AcceptInviteInput, Workspace
 };
 use crate::models::conflicts::ConflictStatus;
+use crate::service::auth::Claims;
 use crate::service::{
     UserService, ResourceService, CourseService, RoomService,
     TimeSlotService, TimetableEntryService, SubstitutionService,
     AvailabilityService, ConflictService, DraftTimetableService,
-    DraftEntryService, PublishedTimetableService, AuthService
+    DraftEntryService, PublishedTimetableService, AuthService,
+    workspace::WorkspaceService
 };
 use crate::error::AppError;
 
@@ -108,8 +111,10 @@ impl Mutation {
 
     async fn create_resource(&self, ctx: &Context<'_>, input: CreateResourceInput) -> Result<Resource> {
         let service = ctx.data::<ResourceService>()?;
+        let claims = ctx.data::<Claims>().map_err(|_| AppError::Unauthorized.extend())?;
         
         let resource = service.create_resource(
+            claims.workspace_id,
             input.owner_id,
             input.name,
             input.description,
@@ -121,7 +126,8 @@ impl Mutation {
 
     async fn create_course(&self, ctx: &Context<'_>, input: CreateCourseInput) -> Result<Course> {
         let service = ctx.data::<CourseService>()?;
-        Ok(service.create_course(input.code, input.name, input.description).await?)
+        let claims = ctx.data::<Claims>().map_err(|_| AppError::Unauthorized.extend())?;
+        Ok(service.create_course(claims.workspace_id, input.code, input.name, input.description).await?)
     }
 
     async fn update_course(&self, ctx: &Context<'_>, input: UpdateCourseInput) -> Result<Course> {
@@ -137,7 +143,8 @@ impl Mutation {
 
     async fn create_room(&self, ctx: &Context<'_>, input: CreateRoomInput) -> Result<Room> {
         let service = ctx.data::<RoomService>()?;
-        Ok(service.create_room(input.name, input.capacity).await?)
+        let claims = ctx.data::<Claims>().map_err(|_| AppError::Unauthorized.extend())?;
+        Ok(service.create_room(claims.workspace_id, input.name, input.capacity).await?)
     }
 
     async fn update_room(&self, ctx: &Context<'_>, input: UpdateRoomInput) -> Result<Room> {
@@ -153,7 +160,8 @@ impl Mutation {
 
     async fn create_time_slot(&self, ctx: &Context<'_>, input: CreateTimeSlotInput) -> Result<TimeSlot> {
         let service = ctx.data::<TimeSlotService>()?;
-        Ok(service.create_time_slot(input.day_of_week, input.start_time, input.end_time).await?)
+        let claims = ctx.data::<Claims>().map_err(|_| AppError::Unauthorized.extend())?;
+        Ok(service.create_time_slot(claims.workspace_id, input.day_of_week, input.start_time, input.end_time).await?)
     }
 
     async fn update_time_slot(&self, ctx: &Context<'_>, input: UpdateTimeSlotInput) -> Result<TimeSlot> {
@@ -216,7 +224,8 @@ impl Mutation {
 
     async fn add_availability(&self, ctx: &Context<'_>, input: AvailabilityInput) -> Result<Availability> {
         let service = ctx.data::<AvailabilityService>()?;
-        Ok(service.submit_availability(input).await?)
+        let claims = ctx.data::<Claims>().map_err(|_| AppError::Unauthorized.extend())?;
+        Ok(service.submit_availability(claims.workspace_id, input).await?)
     }
 
     async fn resolve_conflict(&self, ctx: &Context<'_>, conflict_id: Uuid, status: ConflictStatus) -> Result<Conflict> {
@@ -227,9 +236,10 @@ impl Mutation {
     async fn save_draft_timetable(&self, ctx: &Context<'_>, input: DraftTimetableInput) -> Result<DraftTimetable> {
         let draft_service = ctx.data::<DraftTimetableService>()?;
         let entry_service = ctx.data::<DraftEntryService>()?;
+        let claims = ctx.data::<Claims>().map_err(|_| AppError::Unauthorized.extend())?;
         
         let entries = input.entries.clone();
-        let draft = draft_service.create_draft_timetable(input).await?;
+        let draft = draft_service.create_draft(claims.workspace_id, input.name, input.term, input.year).await?;
         
         entry_service.add_entries_to_draft(draft.id, entries).await?;
         
@@ -238,7 +248,8 @@ impl Mutation {
 
     async fn publish_timetable(&self, ctx: &Context<'_>, draft_timetable_id: Uuid) -> Result<crate::graphql::types::PublishedTimetable> {
         let service = ctx.data::<PublishedTimetableService>()?;
-        Ok(service.publish_timetable(draft_timetable_id).await?)
+        let claims = ctx.data::<Claims>().map_err(|_| AppError::Unauthorized.extend())?;
+        Ok(service.publish_timetable(claims.workspace_id, draft_timetable_id).await?)
     }
 
     async fn request_magic_link(&self, ctx: &Context<'_>, input: RequestMagicLinkInput) -> Result<String> {
@@ -254,5 +265,24 @@ impl Mutation {
             token,
             user,
         })
+    }
+
+    async fn create_workspace(&self, ctx: &Context<'_>, input: CreateWorkspaceInput) -> Result<Workspace> {
+        let claims = ctx.data::<Claims>().map_err(|_| AppError::Unauthorized.extend())?;
+        let service = ctx.data::<WorkspaceService>()?;
+        Ok(service.create_workspace(claims.sub, input.name).await?)
+    }
+
+    async fn create_invite(&self, ctx: &Context<'_>, input: CreateInviteInput) -> Result<String> {
+        let claims = ctx.data::<Claims>().map_err(|_| AppError::Unauthorized.extend())?;
+        let service = ctx.data::<WorkspaceService>()?;
+        Ok(service.create_invite(input.workspace_id, claims.sub, input.email, input.role).await?)
+    }
+
+    async fn accept_invite(&self, ctx: &Context<'_>, input: AcceptInviteInput) -> Result<bool> {
+        let claims = ctx.data::<Claims>().map_err(|_| AppError::Unauthorized.extend())?;
+        let service = ctx.data::<WorkspaceService>()?;
+        service.accept_invite(claims.sub, input.token).await?;
+        Ok(true)
     }
 }

@@ -13,6 +13,7 @@ pub mod conflicts;
 pub mod draft_timetables;
 pub mod published_timetables;
 pub mod draft_entries;
+pub mod workspace;
 
 pub use auth::AuthService;
 pub use users::UserService;
@@ -29,3 +30,4 @@ pub use conflicts::ConflictService;
 pub use draft_timetables::DraftTimetableService;
 pub use published_timetables::PublishedTimetableService;
 pub use draft_entries::DraftEntryService;
+pub use workspace::WorkspaceService;

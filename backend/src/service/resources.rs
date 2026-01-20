@@ -15,6 +15,7 @@ impl ResourceService {
 
     pub async fn create_resource(
         &self,
+        workspace_id: Uuid,
         owner_id: Uuid,
         name: String,
         description: Option<String>,
@@ -22,6 +23,7 @@ impl ResourceService {
     ) -> AppResult<Resource> {
         let resource = Resource {
             id: Uuid::new_v4(),
+            workspace_id,
             owner_id,
             name,
             description,

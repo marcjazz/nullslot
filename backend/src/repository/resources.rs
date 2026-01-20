@@ -16,10 +16,11 @@ impl ResourceRepository {
     pub async fn create(&self, resource: Resource) -> AppResult<Resource> {
         sqlx::query!(
             r#"
-            INSERT INTO resources (id, owner_id, name, description, metadata, created_at, updated_at)
-            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            INSERT INTO resources (id, workspace_id, owner_id, name, description, metadata, created_at, updated_at)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
             "#,
             resource.id,
+            resource.workspace_id,
             resource.owner_id,
             resource.name,
             resource.description,
@@ -41,7 +42,7 @@ impl ResourceRepository {
         let resource = sqlx::query_as!(
             Resource,
             r#"
-            SELECT id, owner_id, name, description, metadata as "metadata: serde_json::Value", created_at, updated_at
+            SELECT id, workspace_id, owner_id, name, description, metadata as "metadata: serde_json::Value", created_at, updated_at
             FROM resources
             WHERE id = $1
             "#,
@@ -57,7 +58,7 @@ impl ResourceRepository {
         let resources = sqlx::query_as!(
             Resource,
             r#"
-            SELECT id, owner_id, name, description, metadata as "metadata: serde_json::Value", created_at, updated_at
+            SELECT id, workspace_id, owner_id, name, description, metadata as "metadata: serde_json::Value", created_at, updated_at
             FROM resources
             ORDER BY created_at DESC
             "#
@@ -72,7 +73,7 @@ impl ResourceRepository {
         let resources = sqlx::query_as!(
             Resource,
             r#"
-            SELECT id, owner_id, name, description, metadata as "metadata: serde_json::Value", created_at, updated_at
+            SELECT id, workspace_id, owner_id, name, description, metadata as "metadata: serde_json::Value", created_at, updated_at
             FROM resources
             WHERE owner_id = $1
             ORDER BY created_at DESC

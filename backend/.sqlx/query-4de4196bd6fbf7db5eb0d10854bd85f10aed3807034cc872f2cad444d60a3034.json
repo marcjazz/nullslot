@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n            SELECT id, name, capacity, created_at, updated_at\n            FROM rooms\n            ORDER BY name ASC\n            ",
+  "query": "\n            SELECT id, name, domain_restriction, created_at, updated_at\n            FROM workspaces\n            WHERE id = $1\n            ",
   "describe": {
     "columns": [
       {
@@ -15,8 +15,8 @@
       },
       {
         "ordinal": 2,
-        "name": "capacity",
-        "type_info": "Int4"
+        "name": "domain_restriction",
+        "type_info": "Text"
       },
       {
         "ordinal": 3,
@@ -30,15 +30,17 @@
       }
     ],
     "parameters": {
-      "Left": []
+      "Left": [
+        "Uuid"
+      ]
     },
     "nullable": [
       false,
       false,
-      false,
+      true,
       false,
       false
     ]
   },
-  "hash": "6a32125aa93379a8e6d1176fee5295f4d062c958e68da759bfeadaccd8467f2b"
+  "hash": "4de4196bd6fbf7db5eb0d10854bd85f10aed3807034cc872f2cad444d60a3034"
 }

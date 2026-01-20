@@ -1,0 +1,27 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            INSERT INTO workspace_members (workspace_id, user_id, role)\n            VALUES ($1, $2, $3)\n            ON CONFLICT (workspace_id, user_id) DO UPDATE SET role = EXCLUDED.role\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        {
+          "Custom": {
+            "name": "workspace_role",
+            "kind": {
+              "Enum": [
+                "Owner",
+                "Editor",
+                "Viewer"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "785930f3df4d8bc61ee61ce1c0f0a8dc4c0a63c6c66b0587048a1b276b790eaa"
+}

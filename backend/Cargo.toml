@@ -26,3 +26,4 @@ async-graphql = { version = "7.0", features = ["chrono", "uuid"] }
 async-graphql-axum = "7.0"
 rand = "0.9.2"
 reqwest = { version = "0.13.1", features = ["json"] }
+base64 = "0.22"

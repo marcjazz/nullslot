@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            INSERT INTO workspace_invites (token_hash, workspace_id, email, role, expires_at, created_by, created_at)\n            VALUES ($1, $2, $3, $4, $5, $6, $7)\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Uuid",
+        "Text",
+        {
+          "Custom": {
+            "name": "workspace_role",
+            "kind": {
+              "Enum": [
+                "Owner",
+                "Editor",
+                "Viewer"
+              ]
+            }
+          }
+        },
+        "Timestamptz",
+        "Uuid",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4bc3d65779476b1032d0ee4b38709632f2c2c156932439203e512d21bca087d7"
+}

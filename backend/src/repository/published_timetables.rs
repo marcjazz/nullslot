@@ -17,13 +17,14 @@ impl Repository {
         let record = sqlx::query_as::<_, PublishedTimetable>(
             r#"
             INSERT INTO published_timetables (
-                id, draft_timetable_id, published_at, valid_from, valid_to, created_at, updated_at
+                id, workspace_id, draft_timetable_id, published_at, valid_from, valid_to, created_at, updated_at
             )
-            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
             RETURNING *
             "#,
         )
         .bind(timetable.id)
+        .bind(timetable.workspace_id)
         .bind(timetable.draft_timetable_id)
         .bind(timetable.published_at)
         .bind(timetable.valid_from)

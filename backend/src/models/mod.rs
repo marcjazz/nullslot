@@ -5,6 +5,7 @@ pub mod draft_timetables;
 pub mod magic_link;
 pub mod published_timetables;
 pub mod snapshot;
+pub mod workspace;
 use async_graphql::Enum;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -16,6 +17,7 @@ pub use draft_entries::DraftEntry;
 pub use draft_timetables::{DraftTimetable, DraftTimetableStatus};
 pub use magic_link::MagicLink;
 pub use published_timetables::PublishedTimetable;
+pub use workspace::{Workspace, WorkspaceInvite, WorkspaceMember, WorkspaceRole};
 
 #[derive(Debug, Serialize, Deserialize, Clone, async_graphql::SimpleObject)]
 pub struct User {
@@ -32,6 +34,7 @@ pub struct User {
 #[derive(Debug, Serialize, Deserialize, Clone, async_graphql::SimpleObject)]
 pub struct Course {
     pub id: Uuid,
+    pub workspace_id: Uuid,
     pub code: String,
     pub name: String,
     pub description: Option<String>,
@@ -42,6 +45,7 @@ pub struct Course {
 #[derive(Debug, Serialize, Deserialize, Clone, async_graphql::SimpleObject)]
 pub struct Room {
     pub id: Uuid,
+    pub workspace_id: Uuid,
     pub name: String,
     pub capacity: i32,
     pub created_at: DateTime<Utc>,
@@ -51,6 +55,7 @@ pub struct Room {
 #[derive(Debug, Serialize, Deserialize, Clone, async_graphql::SimpleObject)]
 pub struct TimeSlot {
     pub id: Uuid,
+    pub workspace_id: Uuid,
     pub day_of_week: i32,
     pub start_time: NaiveTime,
     pub end_time: NaiveTime,
@@ -105,6 +110,7 @@ pub struct Token {
 #[derive(Debug, Serialize, Deserialize, Clone, async_graphql::SimpleObject)]
 pub struct Resource {
     pub id: Uuid,
+    pub workspace_id: Uuid,
     pub owner_id: Uuid,
     pub name: String,
     pub description: Option<String>,

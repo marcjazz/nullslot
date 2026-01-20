@@ -6,6 +6,7 @@ use sqlx::FromRow;
 #[derive(Debug, Serialize, Deserialize, Clone, FromRow, async_graphql::SimpleObject)]
 pub struct Availability {
     pub id: Uuid,
+    pub workspace_id: Uuid,
     pub teacher_id: Uuid,
     pub day_of_week: i32,
     pub start_time: NaiveTime,

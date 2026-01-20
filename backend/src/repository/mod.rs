@@ -11,6 +11,7 @@ pub mod conflicts;
 pub mod draft_timetables;
 pub mod published_timetables;
 pub mod draft_entries;
+pub mod workspace;
 
 pub use users::UserRepository;
 pub use resources::ResourceRepository;
@@ -25,3 +26,4 @@ pub use conflicts::Repository as ConflictRepository;
 pub use draft_timetables::Repository as DraftTimetableRepository;
 pub use published_timetables::Repository as PublishedTimetableRepository;
 pub use draft_entries::Repository as DraftEntryRepository;
+pub use workspace::WorkspaceRepository;
