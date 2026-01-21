@@ -9,3 +9,13 @@ export const ME_QUERY = gql`
     }
   }
 `;
+
+export const MY_WORKSPACES = gql`
+  query MyWorkspaces {
+    myWorkspaces {
+      id
+      name
+      ownerId
+    }
+  }
+`;

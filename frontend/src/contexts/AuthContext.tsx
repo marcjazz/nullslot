@@ -9,8 +9,10 @@ interface User {
 interface AuthContextType {
   user: User | null;
   token: string | null;
+  currentWorkspaceId: string | null;
   login: (userData: User, userToken: string) => void;
   logout: () => void;
+  switchWorkspace: (id: string | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,10 +20,13 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [currentWorkspaceId, setCurrentWorkspaceId] = useState<string | null>(null);
 
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
+    const storedWorkspaceId = localStorage.getItem('workspace_id');
+
     if (storedToken && storedUser) {
       setToken(storedToken);
       try {
@@ -31,6 +36,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         localStorage.removeItem('user');
         localStorage.removeItem('token');
       }
+    }
+
+    if (storedWorkspaceId) {
+      setCurrentWorkspaceId(storedWorkspaceId);
     }
   }, []);
 
@@ -46,10 +55,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setToken(null);
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('workspace_id');
+    setCurrentWorkspaceId(null);
+  };
+
+  const switchWorkspace = (id: string | null) => {
+    setCurrentWorkspaceId(id);
+    if (id) {
+      localStorage.setItem('workspace_id', id);
+    } else {
+      localStorage.removeItem('workspace_id');
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider value={{ user, token, currentWorkspaceId, login, logout, switchWorkspace }}>
       {children}
     </AuthContext.Provider>
   );
