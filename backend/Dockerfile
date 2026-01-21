@@ -40,7 +40,7 @@ COPY --from=builder /usr/src/app/migrations ./migrations
 EXPOSE 8080
 
 # Healthcheck
-HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD curl --fail http://localhost:8080/health || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD curl --fail http://localhost:8080/api/v1/health || exit 1
 
 # Run the binary
 CMD ["./backend"]

@@ -105,6 +105,14 @@ jobs:
           workload_identity_provider: "projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ secrets.WIP_POOL }}/providers/${{ secrets.WIP_PROVIDER }}"
           service_account: ${{ secrets.GHA_SERVICE_ACCOUNT }}
 
+      - name: Run database migrations
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          sudo apt-get update && sudo apt-get install -y libpq-dev
+          cargo install sqlx-cli --no-default-features --features native-tls,postgres
+          sqlx migrate run --source backend/migrations
+
       - name: Deploy to Cloud Run
         id: deploy
         uses: google-github-actions/deploy-cloudrun@v2
@@ -112,6 +120,14 @@ jobs:
           service: nullslot
           image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
           region: ${{ env.GCP_REGION }}
+          env_vars: |
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
+            OIDC_CLIENT_ID=${{ secrets.OIDC_CLIENT_ID }}
+            OIDC_CLIENT_SECRET=${{ secrets.OIDC_CLIENT_SECRET }}
+            OIDC_ISSUER_URL=${{ secrets.OIDC_ISSUER_URL }}
+            OIDC_REDIRECT_URI=${{ secrets.OIDC_REDIRECT_URI }}
+            OIDC_FRONTEND_REDIRECT_URL=${{ secrets.OIDC_FRONTEND_REDIRECT_URL }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
 
       - name: Show Output
         run: echo ${{ steps.deploy.outputs.url }}
